@@ -7,6 +7,12 @@ var MONGO_SERVER = "mongodb://ngocdon:urlshortener@ds023912.mlab.com:23912/url";
 
 app.use(express.static(__dirname + "/public"));
 
+app.set("view engine", "ejs");
+
+app.get("/", function (req, res) {
+	res.render("index", {host: req.headers.host});
+})
+
 app.get("/new/*", function (req, res) {
 	var url = req.url.substring('/new/'.length);
 	if (!(/^https?:\/\/([\w0-9\-_]+\.)+([\w-_0-9\?\&=]+)(:[0-9]+)?$/).test(url)){
