@@ -3,6 +3,8 @@ var mongo = require("mongodb").MongoClient;
 var ObjectId = require("mongodb").ObjectId;
 var app = express();
 
+var MONGO_SERVER = "mongodb://ngocdon:urlshortener@ds023912.mlab.com:23912/url";
+
 app.use(express.static(__dirname + "/public"));
 
 app.get("/new/*", function (req, res) {
@@ -13,7 +15,7 @@ app.get("/new/*", function (req, res) {
 		});
 		return;
 	}
-	mongo.connect("mongodb://ngocdon:urlshortener@ds023912.mlab.com:23912/url", function (err, db) {
+	mongo.connect(MONGO_SERVER, function (err, db) {
 		var urls = db.collection("urls");
 		urls.find({
 			full: url
@@ -79,6 +81,40 @@ app.get("/new/*", function (req, res) {
 		})
 	})
 });
+
+app.get("/:id", function (req, res) {
+	var id = req.params.id;
+	if (/^[0-9]+$/.test(id)){
+		mongo.connect(MONGO_SERVER, function (err, db) {
+			if (err){
+				console.log(err);
+				return;
+			}
+			var urls = db.collection("urls");
+			id = parseInt(id);
+			urls.find({
+				short: id
+			}).toArray(function (err, array) {
+				if (err){
+					console.log(err);
+					db.close();
+					return;
+				}
+				if (array.length < 1){
+					res.json({
+						error: "This url is not in the database"
+					});
+					db.close();
+				}
+				db.close();
+				res.redirect(array[0].full);
+			})
+		})
+	}
+	else{
+		res.end("404");
+	}
+})
 
 app.listen(process.env.PORT || 3000);
 
