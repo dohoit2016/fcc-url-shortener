@@ -10,7 +10,6 @@ app.use(express.static(__dirname + "/public"));
 app.set("view engine", "ejs");
 
 app.get("/", function (req, res) {
-	res.end(req.connection.encrypted);
 	res.render("index", {host: (req.connection.encrypted ? "https://" : "http://") + req.headers.host});
 })
 
